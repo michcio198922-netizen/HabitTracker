@@ -130,7 +130,7 @@
     
     <div class="date-badge" id="currentDateDisplay">📅 Dzisiaj: Loading...</div>
 
-    <!-- Statystyki zagregowane -->
+    <!-- Statystyki -->
     <div class="stats-card">
       <div>
         <div class="stat-val" id="statTotal">0</div>
@@ -196,12 +196,8 @@
       navigator.serviceWorker.register(URL.createObjectURL(blob)).catch(() => {});
     }
 
-    function getTodayDate() {
-      return new Date();
-    }
-
     function getTodayDateString() {
-      const today = getTodayDate();
+      const today = new Date();
       const day = String(today.getDate()).padStart(2, '0');
       const month = String(today.getMonth() + 1).padStart(2, '0');
       const year = today.getFullYear();
@@ -211,7 +207,17 @@
     const todayFormatted = getTodayDateString();
     document.getElementById('currentDateDisplay').innerText = `📅 Dzisiaj: ${todayFormatted}`;
 
-    let habits = JSON.parse(localStorage.getItem('habitsList') || '[]');
+    // Bezpieczne wczytywanie danych z lokalnej pamięci
+    function loadHabitsFromStorage() {
+      try {
+        const data = localStorage.getItem('habitsList');
+        return data ? JSON.parse(data) : [];
+      } catch(e) {
+        return [];
+      }
+    }
+
+    let habits = loadHabitsFromStorage();
     let currentFilter = 'all';
 
     function saveHabits() {
@@ -240,7 +246,7 @@
 
       if (!name) return;
 
-      habits.push({
+      const newHabit = {
         id: Date.now(),
         name: name,
         type: typeInput.value,
@@ -248,21 +254,26 @@
         streak: 0,
         createdAtTimestamp: Date.now(),
         createdAtStr: todayFormatted
-      });
+      };
 
+      habits.push(newHabit);
       nameInput.value = '';
       saveHabits();
     }
 
     function incrementStreak(id) {
       const habit = habits.find(h => h.id === id);
-      if (habit) { habit.streak++; saveHabits(); }
+      if (habit) { 
+        habit.streak++; 
+        saveHabits(); 
+      }
     }
 
     function resetStreak(id) {
       const habit = habits.find(h => h.id === id);
       if (habit && confirm('Czy na pewno złamałeś ten nawyk? Licznik wyzeruje się.')) {
-        habit.streak = 0; saveHabits();
+        habit.streak = 0; 
+        saveHabits();
       }
     }
 
@@ -318,12 +329,11 @@
               </div>
               <div class="habit-actions">
                 <button class="btn-action btn-good" onclick="incrementStreak(${h.id})">+1 d. ✅</button>
-                ${h.type === 'bad' ? `<button class="btn-action btn-reset" onclick="resetStreak(${h.id})">Reset ⚠️</button>` : ''}
+                ${h.type === 'bad' ? `<button class="btn-action btn-reset" onclick="resetStreak(${h.id})">Reset ⚠️️</button>` : ''}
                 <button class="btn-delete" onclick="deleteHabit(${h.id})">🗑️</button>
               </div>
             </div>
 
-            <!-- Pasek i wskaźnik procentowy -->
             <div class="progress-container">
               <div class="progress-label">
                 <span>Skuteczność</span>
@@ -337,7 +347,7 @@
         `;
         
         if (h.type === 'good') { goodList.innerHTML += cardHtml; goodCount += h.streak; }
-        else { badList.innerHTML += cardHtml; badCount = (badCount || 0) + h.streak; }
+        else { badList.innerHTML += cardHtml; }
       });
 
       goodSec.style.display = (currentFilter === 'bad') ? 'none' : 'block';
@@ -353,6 +363,7 @@
       document.getElementById('statOverallPct').innerText = `${overallPct}%`;
     }
 
+    // Pierwsze wyrenderowanie danych po wczytaniu
     render();
   </script>
 </body>
