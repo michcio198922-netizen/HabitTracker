@@ -5,33 +5,57 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <title>Mój Tracker Nawyków Pro</title>
   
-  <!-- Manifest PWA z dedykowaną ikoną -->
   <link rel="manifest" id="manifestPlaceholder">
-  <meta name="theme-color" content="#3b82f6">
+  <meta name="theme-color" content="#2563eb">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
   <script>
-    // Generowanie ikony PWA w locie
+    // Generowanie dedykowanej ikony PWA (Zielony kwadrat z fajką ✅)
     const canvas = document.createElement('canvas');
     canvas.width = 512; canvas.height = 512;
     const ctx = canvas.getContext('2d');
-    ctx.fillStyle = '#2563eb'; ctx.fillRect(0, 0, 512, 512);
-    ctx.font = 'bold 280px sans-serif'; ctx.fillStyle = 'white';
-    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    ctx.fillText('✅', 256, 270);
+    
+    // Tło ikony
+    ctx.fillStyle = '#059669';
+    ctx.beginPath();
+    ctx.roundRect(0, 0, 512, 512, 100);
+    ctx.fill();
+    
+    // Symbol ✅
+    ctx.font = 'bold 300px sans-serif'; 
+    ctx.fillStyle = 'white';
+    ctx.textAlign = 'center'; 
+    ctx.textBaseline = 'middle';
+    ctx.fillText('✅', 256, 275);
+    
     const iconDataUrl = canvas.toDataURL('image/png');
 
-    // Tworzenie dynamicznego manifestu PWA
+    // Ustawienia ikony dla przeglądarki i Androida
+    const appleIcon = document.createElement('link');
+    appleIcon.rel = 'apple-touch-icon';
+    appleIcon.href = iconDataUrl;
+    document.head.appendChild(appleIcon);
+
+    const favicon = document.createElement('link');
+    favicon.rel = 'icon';
+    favicon.type = 'image/png';
+    favicon.href = iconDataUrl;
+    document.head.appendChild(favicon);
+
+    // Manifest PWA
     const manifest = {
-      name: "Tracker Nawyków Pro",
+      name: "Tracker Nawyków",
       short_name: "Nawyki",
       start_url: "./",
       display: "standalone",
       background_color: "#0f172a",
       theme_color: "#2563eb",
-      icons: [{ src: iconDataUrl, sizes: "512x512", type: "image/png", purpose: "any maskable" }]
+      icons: [
+        { src: iconDataUrl, sizes: "512x512", type: "image/png", purpose: "any" },
+        { src: iconDataUrl, sizes: "512x512", type: "image/png", purpose: "maskable" }
+      ]
     };
     const stringManifest = JSON.stringify(manifest);
     const blob = new Blob([stringManifest], {type: 'application/json'});
@@ -51,12 +75,12 @@
     * { box-sizing: border-box; transition: background-color 0.2s, color 0.2s; }
     body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg-color); color: var(--text-main); margin: 0; padding: 16px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
     .container { width: 100%; max-width: 500px; }
-    
-    .install-banner { background: #059669; color: white; padding: 12px 16px; border-radius: 12px; font-weight: bold; margin-bottom: 16px; display: none; justify-content: space-between; align-items: center; cursor: pointer; box-shadow: 0 4px 12px rgba(5, 150, 105, 0.4); }
 
-    header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-    h1 { font-size: 22px; margin: 0; color: #60a5fa; }
-    .theme-toggle { background: var(--card-bg); border: 1px solid var(--border-color); color: var(--text-main); padding: 8px 12px; border-radius: 20px; cursor: pointer; font-size: 14px; }
+    header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+    h1 { font-size: 20px; margin: 0; color: #60a5fa; }
+    .date-badge { font-size: 13px; color: var(--text-muted); text-align: center; margin-bottom: 16px; font-weight: 500; }
+    
+    .theme-toggle { background: var(--card-bg); border: 1px solid var(--border-color); color: var(--text-main); padding: 6px 12px; border-radius: 20px; cursor: pointer; font-size: 13px; }
 
     .stats-card { background: var(--card-bg); padding: 16px; border-radius: 16px; border: 1px solid var(--border-color); display: flex; justify-content: space-around; text-align: center; margin-bottom: 20px; }
     .stat-val { font-size: 22px; font-weight: bold; color: var(--accent); }
@@ -83,6 +107,7 @@
     .habit-info h3 { margin: 0 0 4px 0; font-size: 16px; }
     .badge { font-size: 11px; padding: 2px 8px; border-radius: 10px; background: var(--bg-color); color: var(--text-muted); border: 1px solid var(--border-color); margin-left: 6px; }
     .habit-info p { margin: 4px 0 0; font-size: 13px; color: var(--text-muted); }
+    .created-date { font-size: 11px; color: var(--text-muted); opacity: 0.8; }
 
     .habit-actions { display: flex; gap: 6px; align-items: center; }
     .btn-action { border: none; padding: 8px 12px; border-radius: 8px; font-weight: bold; cursor: pointer; color: white; font-size: 13px; }
@@ -93,16 +118,13 @@
 </head>
 <body>
   <div class="container">
-    <!-- Przycisk instalacji PWA -->
-    <div class="install-banner" id="installBanner" onclick="installPWA()">
-      <span>📲 Zainstaluj aplikację na telefonie</span>
-      <span>Pobierz</span>
-    </div>
-
     <header>
       <h1>Mój Tracker Nawyków</h1>
       <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn">🌙 Tryb</button>
     </header>
+    
+    <!-- Realna data -->
+    <div class="date-badge" id="currentDateDisplay">📅 Dzisiaj: 06.10.2026</div>
 
     <!-- Statystyki -->
     <div class="stats-card">
@@ -161,7 +183,7 @@
   </div>
 
   <script>
-    // Rejestracja Service Workera dla spełnienia wymogów PWA
+    // Rejestracja Service Workera dla wsparcia PWA
     if ('serviceWorker' in navigator) {
       const swCode = `
         self.addEventListener('install', e => self.skipWaiting());
@@ -171,25 +193,9 @@
       navigator.serviceWorker.register(URL.createObjectURL(blob)).catch(() => {});
     }
 
-    // Obsługa zdarzenia instalacji PWA
-    let deferredPrompt;
-    window.addEventListener('beforeinstallprompt', (e) => {
-      e.preventDefault();
-      deferredPrompt = e;
-      document.getElementById('installBanner').style.display = 'flex';
-    });
-
-    function installPWA() {
-      if (deferredPrompt) {
-        deferredPrompt.prompt();
-        deferredPrompt.userChoice.then((choiceResult) => {
-          if (choiceResult.outcome === 'accepted') {
-            document.getElementById('installBanner').style.display = 'none';
-          }
-          deferredPrompt = null;
-        });
-      }
-    }
+    // Ustawienie aktualnej daty
+    const todayFormatted = "06.10.2026";
+    document.getElementById('currentDateDisplay').innerText = `📅 Dzisiaj: ${todayFormatted}`;
 
     let habits = JSON.parse(localStorage.getItem('habitsList') || '[]');
     let currentFilter = 'all';
@@ -225,7 +231,8 @@
         name: name,
         type: typeInput.value,
         category: catInput.value,
-        streak: 0
+        streak: 0,
+        createdAt: todayFormatted
       });
 
       nameInput.value = '';
@@ -233,76 +240,4 @@
     }
 
     function incrementStreak(id) {
-      const habit = habits.find(h => h.id === id);
-      if (habit) { habit.streak++; saveHabits(); }
-    }
-
-    function resetStreak(id) {
-      const habit = habits.find(h => h.id === id);
-      if (habit && confirm('Czy na pewno złamałeś ten nawyk? Licznik wyzeruje się.')) {
-        habit.streak = 0; saveHabits();
-      }
-    }
-
-    function deleteHabit(id) {
-      if (confirm('Czy na pewno chcesz usunąć ten nawyk?')) {
-        habits = habits.filter(h => h.id !== id);
-        saveHabits();
-      }
-    }
-
-    function filterHabits(type, el) {
-      currentFilter = type;
-      document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
-      el.classList.add('active');
-      render();
-    }
-
-    function render() {
-      const goodList = document.getElementById('goodHabitsList');
-      const badList = document.getElementById('badHabitsList');
-      const goodSec = document.getElementById('goodSection');
-      const badSec = document.getElementById('badSection');
-
-      goodList.innerHTML = ''; badList.innerHTML = '';
-      let goodCount = 0; let badCount = 0;
-
-      const filtered = habits.filter(h => {
-        if (currentFilter === 'good') return h.type === 'good';
-        if (currentFilter === 'bad') return h.type === 'bad';
-        return true;
-      });
-
-      filtered.forEach(h => {
-        const cardHtml = `
-          <div class="habit-card ${h.type}">
-            <div class="habit-info">
-              <h3>${h.name} <span class="badge">${h.category || 'Inne'}</span></h3>
-              <p>${h.type === 'good' ? 'Seria' : 'Czysty od'}: <strong>${h.streak} dni</strong></p>
-            </div>
-            <div class="habit-actions">
-              <button class="btn-action btn-good" onclick="incrementStreak(${h.id})">+1 d. ✅</button>
-              ${h.type === 'bad' ? `<button class="btn-action btn-reset" onclick="resetStreak(${h.id})">Reset ⚠️</button>` : ''}
-              <button class="btn-delete" onclick="deleteHabit(${h.id})">🗑️</button>
-            </div>
-          </div>
-        `;
-        if (h.type === 'good') { goodList.innerHTML += cardHtml; goodCount += h.streak; }
-        else { badList.innerHTML += cardHtml; badCount += h.streak; }
-      });
-
-      goodSec.style.display = (currentFilter === 'bad') ? 'none' : 'block';
-      badSec.style.display = (currentFilter === 'good') ? 'none' : 'block';
-
-      if (goodList.innerHTML === '') goodList.innerHTML = '<p style="color:var(--text-muted); font-size: 13px;">Brak nawyków w tej sekcji.</p>';
-      if (badList.innerHTML === '') badList.innerHTML = '<p style="color:var(--text-muted); font-size: 13px;">Brak nawyków w tej sekcji.</p>';
-
-      document.getElementById('statTotal').innerText = habits.length;
-      document.getElementById('statGood').innerText = goodCount;
-      document.getElementById('statBad').innerText = badCount;
-    }
-
-    render();
-  </script>
-</body>
-</html>
+      const habit
