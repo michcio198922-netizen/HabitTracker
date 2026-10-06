@@ -96,10 +96,11 @@
     .good-title { color: var(--good-color); }
     .bad-title { color: var(--bad-color); }
 
-    .habit-card { background: var(--card-bg); padding: 16px; border-radius: 14px; margin-bottom: 12px; border: 1px solid var(--border-color); border-left: 6px solid var(--primary); display: flex; justify-content: space-between; align-items: center; }
+    .habit-card { background: var(--card-bg); padding: 16px; border-radius: 14px; margin-bottom: 12px; border: 1px solid var(--border-color); border-left: 6px solid var(--primary); display: flex; flex-direction: column; gap: 10px; }
     .habit-card.good { border-left-color: var(--good-color); }
     .habit-card.bad { border-left-color: var(--bad-color); }
 
+    .habit-header { display: flex; justify-content: space-between; align-items: center; }
     .habit-info h3 { margin: 0 0 4px 0; font-size: 16px; }
     .badge { font-size: 11px; padding: 2px 8px; border-radius: 10px; background: var(--bg-color); color: var(--text-muted); border: 1px solid var(--border-color); margin-left: 6px; }
     .habit-info p { margin: 4px 0 0; font-size: 13px; color: var(--text-muted); }
@@ -110,6 +111,14 @@
     .btn-good { background: #059669; }
     .btn-reset { background: #dc2626; }
     .btn-delete { background: transparent; color: var(--text-muted); font-size: 16px; border: none; cursor: pointer; padding: 4px 8px; }
+
+    /* Pasek postępu procentowego */
+    .progress-container { width: 100%; margin-top: 4px; }
+    .progress-label { display: flex; justify-content: space-between; font-size: 12px; font-weight: bold; color: var(--text-muted); margin-bottom: 4px; }
+    .progress-bar-bg { background: var(--bg-color); height: 8px; border-radius: 4px; overflow: hidden; width: 100%; border: 1px solid var(--border-color); }
+    .progress-bar-fill { height: 100%; border-radius: 4px; transition: width 0.3s ease; }
+    .good .progress-bar-fill { background: var(--good-color); }
+    .bad .progress-bar-fill { background: var(--bad-color); }
   </style>
 </head>
 <body>
@@ -119,10 +128,9 @@
       <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn">🌙 Tryb</button>
     </header>
     
-    <!-- Realna, dynamicznie pobierana data -->
     <div class="date-badge" id="currentDateDisplay">📅 Dzisiaj: Loading...</div>
 
-    <!-- Statystyki -->
+    <!-- Statystyki zagregowane -->
     <div class="stats-card">
       <div>
         <div class="stat-val" id="statTotal">0</div>
@@ -133,8 +141,8 @@
         <div class="stat-lbl">Dobre serii</div>
       </div>
       <div>
-        <div class="stat-val" id="statBad">0</div>
-        <div class="stat-lbl">Czystych dni</div>
+        <div class="stat-val" id="statOverallPct">0%</div>
+        <div class="stat-lbl">Średnia skuteczność</div>
       </div>
     </div>
 
@@ -188,9 +196,12 @@
       navigator.serviceWorker.register(URL.createObjectURL(blob)).catch(() => {});
     }
 
-    // Automatyczne, dynamiczne wyliczanie dzisiejszej daty
+    function getTodayDate() {
+      return new Date();
+    }
+
     function getTodayDateString() {
-      const today = new Date();
+      const today = getTodayDate();
       const day = String(today.getDate()).padStart(2, '0');
       const month = String(today.getMonth() + 1).padStart(2, '0');
       const year = today.getFullYear();
@@ -235,7 +246,8 @@
         type: typeInput.value,
         category: catInput.value,
         streak: 0,
-        createdAt: todayFormatted
+        createdAtTimestamp: Date.now(),
+        createdAtStr: todayFormatted
       });
 
       nameInput.value = '';
@@ -268,6 +280,14 @@
       render();
     }
 
+    function calculateProgress(habit) {
+      const createdAt = habit.createdAtTimestamp || habit.id;
+      const diffMs = Date.now() - createdAt;
+      const daysExist = Math.max(1, Math.ceil(diffMs / (1000 * 60 * 60 * 24)));
+      const percentage = Math.min(100, Math.round((habit.streak / daysExist) * 100));
+      return { daysExist, percentage };
+    }
+
     function render() {
       const goodList = document.getElementById('goodHabitsList');
       const badList = document.getElementById('badHabitsList');
@@ -275,7 +295,8 @@
       const badSec = document.getElementById('badSection');
 
       goodList.innerHTML = ''; badList.innerHTML = '';
-      let goodCount = 0; let badCount = 0;
+      let goodCount = 0;
+      let totalPercentageSum = 0;
 
       const filtered = habits.filter(h => {
         if (currentFilter === 'good') return h.type === 'good';
@@ -284,22 +305,39 @@
       });
 
       filtered.forEach(h => {
+        const { percentage } = calculateProgress(h);
+        totalPercentageSum += percentage;
+
         const cardHtml = `
           <div class="habit-card ${h.type}">
-            <div class="habit-info">
-              <h3>${h.name} <span class="badge">${h.category || 'Inne'}</span></h3>
-              <p>${h.type === 'good' ? 'Seria' : 'Czysty od'}: <strong>${h.streak} dni</strong></p>
-              <div class="created-date">Dodano: ${h.createdAt || todayFormatted}</div>
+            <div class="habit-header">
+              <div class="habit-info">
+                <h3>${h.name} <span class="badge">${h.category || 'Inne'}</span></h3>
+                <p>${h.type === 'good' ? 'Seria' : 'Czysty od'}: <strong>${h.streak} dni</strong></p>
+                <div class="created-date">Dodano: ${h.createdAtStr || todayFormatted}</div>
+              </div>
+              <div class="habit-actions">
+                <button class="btn-action btn-good" onclick="incrementStreak(${h.id})">+1 d. ✅</button>
+                ${h.type === 'bad' ? `<button class="btn-action btn-reset" onclick="resetStreak(${h.id})">Reset ⚠️</button>` : ''}
+                <button class="btn-delete" onclick="deleteHabit(${h.id})">🗑️</button>
+              </div>
             </div>
-            <div class="habit-actions">
-              <button class="btn-action btn-good" onclick="incrementStreak(${h.id})">+1 d. ✅</button>
-              ${h.type === 'bad' ? `<button class="btn-action btn-reset" onclick="resetStreak(${h.id})">Reset ⚠️</button>` : ''}
-              <button class="btn-delete" onclick="deleteHabit(${h.id})">🗑️</button>
+
+            <!-- Pasek i wskaźnik procentowy -->
+            <div class="progress-container">
+              <div class="progress-label">
+                <span>Skuteczność</span>
+                <span>${percentage}%</span>
+              </div>
+              <div class="progress-bar-bg">
+                <div class="progress-bar-fill" style="width: ${percentage}%;"></div>
+              </div>
             </div>
           </div>
         `;
+        
         if (h.type === 'good') { goodList.innerHTML += cardHtml; goodCount += h.streak; }
-        else { badList.innerHTML += cardHtml; badCount += h.streak; }
+        else { badList.innerHTML += cardHtml; badCount = (badCount || 0) + h.streak; }
       });
 
       goodSec.style.display = (currentFilter === 'bad') ? 'none' : 'block';
@@ -308,9 +346,11 @@
       if (goodList.innerHTML === '') goodList.innerHTML = '<p style="color:var(--text-muted); font-size: 13px;">Brak nawyków w tej sekcji.</p>';
       if (badList.innerHTML === '') badList.innerHTML = '<p style="color:var(--text-muted); font-size: 13px;">Brak nawyków w tej sekcji.</p>';
 
+      const overallPct = filtered.length > 0 ? Math.round(totalPercentageSum / filtered.length) : 0;
+
       document.getElementById('statTotal').innerText = habits.length;
       document.getElementById('statGood').innerText = goodCount;
-      document.getElementById('statBad').innerText = badCount;
+      document.getElementById('statOverallPct').innerText = `${overallPct}%`;
     }
 
     render();
