@@ -4,34 +4,55 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <title>Mój Tracker Nawyków Pro</title>
-  <link rel="manifest" href="data:application/manifest+json;utf8,{%22name%22:%22Tracker%20Nawykow%20Pro%22,%22short_name%22:%22Nawyki%22,%22start_url%22:%22.%22,%22display%22:%22standalone%22,%22background_color%22:%22%230f172a%22,%22theme_color%22:%22%233b82f6%22}">
+  
+  <!-- Manifest PWA z dedykowaną ikoną -->
+  <link rel="manifest" id="manifestPlaceholder">
+  <meta name="theme-color" content="#3b82f6">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+  <script>
+    // Generowanie ikony PWA w locie
+    const canvas = document.createElement('canvas');
+    canvas.width = 512; canvas.height = 512;
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = '#2563eb'; ctx.fillRect(0, 0, 512, 512);
+    ctx.font = 'bold 280px sans-serif'; ctx.fillStyle = 'white';
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText('✅', 256, 270);
+    const iconDataUrl = canvas.toDataURL('image/png');
+
+    // Tworzenie dynamicznego manifestu PWA
+    const manifest = {
+      name: "Tracker Nawyków Pro",
+      short_name: "Nawyki",
+      start_url: "./",
+      display: "standalone",
+      background_color: "#0f172a",
+      theme_color: "#2563eb",
+      icons: [{ src: iconDataUrl, sizes: "512x512", type: "image/png", purpose: "any maskable" }]
+    };
+    const stringManifest = JSON.stringify(manifest);
+    const blob = new Blob([stringManifest], {type: 'application/json'});
+    document.getElementById('manifestPlaceholder').setAttribute('href', URL.createObjectURL(blob));
+  </script>
+
   <style>
     :root {
-      --bg-color: #0f172a;
-      --card-bg: #1e293b;
-      --text-main: #f8fafc;
-      --text-muted: #94a3b8;
-      --border-color: #334155;
-      --primary: #2563eb;
-      --primary-hover: #1d4ed8;
-      --good-color: #10b981;
-      --bad-color: #ef4444;
-      --accent: #f59e0b;
+      --bg-color: #0f172a; --card-bg: #1e293b; --text-main: #f8fafc;
+      --text-muted: #94a3b8; --border-color: #334155; --primary: #2563eb;
+      --good-color: #10b981; --bad-color: #ef4444; --accent: #f59e0b;
     }
-
     [data-theme="light"] {
-      --bg-color: #f1f5f9;
-      --card-bg: #ffffff;
-      --text-main: #0f172a;
-      --text-muted: #64748b;
-      --border-color: #e2e8f0;
-      --primary: #2563eb;
-      --primary-hover: #1d4ed8;
+      --bg-color: #f1f5f9; --card-bg: #ffffff; --text-main: #0f172a;
+      --text-muted: #64748b; --border-color: #e2e8f0;
     }
-
     * { box-sizing: border-box; transition: background-color 0.2s, color 0.2s; }
     body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg-color); color: var(--text-main); margin: 0; padding: 16px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
     .container { width: 100%; max-width: 500px; }
+    
+    .install-banner { background: #059669; color: white; padding: 12px 16px; border-radius: 12px; font-weight: bold; margin-bottom: 16px; display: none; justify-content: space-between; align-items: center; cursor: pointer; box-shadow: 0 4px 12px rgba(5, 150, 105, 0.4); }
 
     header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
     h1 { font-size: 22px; margin: 0; color: #60a5fa; }
@@ -46,7 +67,6 @@
     input[type="text"], select { background: var(--bg-color); border: 1px solid var(--border-color); color: var(--text-main); padding: 12px; border-radius: 10px; font-size: 15px; outline: none; }
     
     .btn { background: var(--primary); color: white; border: none; padding: 12px; font-size: 15px; font-weight: bold; border-radius: 10px; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 6px; }
-    .btn:active { transform: scale(0.98); background: var(--primary-hover); }
 
     .filters { display: flex; gap: 8px; margin-bottom: 15px; overflow-x: auto; padding-bottom: 4px; }
     .chip { background: var(--card-bg); border: 1px solid var(--border-color); color: var(--text-muted); padding: 6px 14px; border-radius: 20px; font-size: 13px; cursor: pointer; whitespace: nowrap; }
@@ -69,13 +89,16 @@
     .btn-good { background: #059669; }
     .btn-reset { background: #dc2626; }
     .btn-delete { background: transparent; color: var(--text-muted); font-size: 16px; border: none; cursor: pointer; padding: 4px 8px; }
-
-    .backup-section { margin-top: 30px; text-align: center; font-size: 12px; color: var(--text-muted); }
-    .backup-btn { background: transparent; border: 1px solid var(--border-color); color: var(--text-muted); padding: 6px 12px; border-radius: 8px; font-size: 12px; cursor: pointer; margin: 4px; }
   </style>
 </head>
 <body>
   <div class="container">
+    <!-- Przycisk instalacji PWA -->
+    <div class="install-banner" id="installBanner" onclick="installPWA()">
+      <span>📲 Zainstaluj aplikację na telefonie</span>
+      <span>Pobierz</span>
+    </div>
+
     <header>
       <h1>Mój Tracker Nawyków</h1>
       <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn">🌙 Tryb</button>
@@ -127,25 +150,47 @@
 
     <!-- Listy Nawyków -->
     <div id="goodSection">
-      <div class="section-title good-title">🟢 Dobre nawyki (Seria sukcesów)</div>
+      <div class="section-title good-title">🟢 Dobre nawyki</div>
       <div id="goodHabitsList"></div>
     </div>
 
     <div id="badSection">
-      <div class="section-title bad-title">🔴 Złe nawyki (Czyste dni bez nawyku)</div>
+      <div class="section-title bad-title">🔴 Złe nawyki</div>
       <div id="badHabitsList"></div>
-    </div>
-
-    <!-- Kopia zapasowa -->
-    <div class="backup-section">
-      <div>Zarządzanie danymi:</div>
-      <button class="backup-btn" onclick="exportData()">📥 Pobierz kopię (JSON)</button>
-      <button class="backup-btn" onclick="importData()">📤 Wgraj kopię</button>
-      <input type="file" id="importFile" style="display:none" onchange="processImport(event)">
     </div>
   </div>
 
   <script>
+    // Rejestracja Service Workera dla spełnienia wymogów PWA
+    if ('serviceWorker' in navigator) {
+      const swCode = `
+        self.addEventListener('install', e => self.skipWaiting());
+        self.addEventListener('fetch', e => e.respondWith(fetch(e.request).catch(() => caches.match(e.request))));
+      `;
+      const blob = new Blob([swCode], {type: 'application/javascript'});
+      navigator.serviceWorker.register(URL.createObjectURL(blob)).catch(() => {});
+    }
+
+    // Obsługa zdarzenia instalacji PWA
+    let deferredPrompt;
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      document.getElementById('installBanner').style.display = 'flex';
+    });
+
+    function installPWA() {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then((choiceResult) => {
+          if (choiceResult.outcome === 'accepted') {
+            document.getElementById('installBanner').style.display = 'none';
+          }
+          deferredPrompt = null;
+        });
+      }
+    }
+
     let habits = JSON.parse(localStorage.getItem('habitsList') || '[]');
     let currentFilter = 'all';
 
@@ -162,7 +207,6 @@
       localStorage.setItem('theme', isDark ? 'light' : 'dark');
     }
 
-    // Wczytaj zapamiętany motyw
     if (localStorage.getItem('theme') === 'light') {
       document.body.setAttribute('data-theme', 'light');
       document.getElementById('themeBtn').innerText = '☀️ Jasny';
@@ -181,8 +225,7 @@
         name: name,
         type: typeInput.value,
         category: catInput.value,
-        streak: 0,
-        createdAt: new Date().toLocaleDateString()
+        streak: 0
       });
 
       nameInput.value = '';
@@ -191,17 +234,13 @@
 
     function incrementStreak(id) {
       const habit = habits.find(h => h.id === id);
-      if (habit) {
-        habit.streak++;
-        saveHabits();
-      }
+      if (habit) { habit.streak++; saveHabits(); }
     }
 
     function resetStreak(id) {
       const habit = habits.find(h => h.id === id);
       if (habit && confirm('Czy na pewno złamałeś ten nawyk? Licznik wyzeruje się.')) {
-        habit.streak = 0;
-        saveHabits();
+        habit.streak = 0; saveHabits();
       }
     }
 
@@ -225,11 +264,8 @@
       const goodSec = document.getElementById('goodSection');
       const badSec = document.getElementById('badSection');
 
-      goodList.innerHTML = '';
-      badList.innerHTML = '';
-
-      let goodCount = 0;
-      let badCount = 0;
+      goodList.innerHTML = ''; badList.innerHTML = '';
+      let goodCount = 0; let badCount = 0;
 
       const filtered = habits.filter(h => {
         if (currentFilter === 'good') return h.type === 'good';
@@ -251,58 +287,19 @@
             </div>
           </div>
         `;
-
-        if (h.type === 'good') {
-          goodList.innerHTML += cardHtml;
-          goodCount += h.streak;
-        } else {
-          badList.innerHTML += cardHtml;
-          badCount += h.streak;
-        }
+        if (h.type === 'good') { goodList.innerHTML += cardHtml; goodCount += h.streak; }
+        else { badList.innerHTML += cardHtml; badCount += h.streak; }
       });
 
-      // Ukrywanie sekcji przy filtrowaniu
       goodSec.style.display = (currentFilter === 'bad') ? 'none' : 'block';
       badSec.style.display = (currentFilter === 'good') ? 'none' : 'block';
 
       if (goodList.innerHTML === '') goodList.innerHTML = '<p style="color:var(--text-muted); font-size: 13px;">Brak nawyków w tej sekcji.</p>';
       if (badList.innerHTML === '') badList.innerHTML = '<p style="color:var(--text-muted); font-size: 13px;">Brak nawyków w tej sekcji.</p>';
 
-      // Aktualizacja statystyk
       document.getElementById('statTotal').innerText = habits.length;
       document.getElementById('statGood').innerText = goodCount;
       document.getElementById('statBad').innerText = badCount;
-    }
-
-    // Eksport / Import danych
-    function exportData() {
-      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(habits));
-      const downloadAnchor = document.createElement('a');
-      downloadAnchor.setAttribute("href", dataStr);
-      downloadAnchor.setAttribute("download", "nawyki_backup.json");
-      document.body.appendChild(downloadAnchor);
-      downloadAnchor.click();
-      downloadAnchor.remove();
-    }
-
-    function importData() {
-      document.getElementById('importFile').click();
-    }
-
-    function processImport(e) {
-      const file = e.target.files[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        try {
-          habits = JSON.parse(e.target.result);
-          saveHabits();
-          alert('Kopia zapasowa została wgrana pomyślnie!');
-        } catch (err) {
-          alert('Błąd podczas odczytu pliku kopii zapasowej.');
-        }
-      };
-      reader.readAsText(file);
     }
 
     render();
