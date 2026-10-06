@@ -12,18 +12,16 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
   <script>
-    // Generowanie dedykowanej ikony PWA (Zielony kwadrat z fajką ✅)
+    // Generowanie ikony PWA
     const canvas = document.createElement('canvas');
     canvas.width = 512; canvas.height = 512;
     const ctx = canvas.getContext('2d');
     
-    // Tło ikony
     ctx.fillStyle = '#059669';
     ctx.beginPath();
     ctx.roundRect(0, 0, 512, 512, 100);
     ctx.fill();
     
-    // Symbol ✅
     ctx.font = 'bold 300px sans-serif'; 
     ctx.fillStyle = 'white';
     ctx.textAlign = 'center'; 
@@ -32,7 +30,6 @@
     
     const iconDataUrl = canvas.toDataURL('image/png');
 
-    // Ustawienia ikony dla przeglądarki i Androida
     const appleIcon = document.createElement('link');
     appleIcon.rel = 'apple-touch-icon';
     appleIcon.href = iconDataUrl;
@@ -44,7 +41,6 @@
     favicon.href = iconDataUrl;
     document.head.appendChild(favicon);
 
-    // Manifest PWA
     const manifest = {
       name: "Tracker Nawyków",
       short_name: "Nawyki",
@@ -123,8 +119,8 @@
       <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn">🌙 Tryb</button>
     </header>
     
-    <!-- Realna data -->
-    <div class="date-badge" id="currentDateDisplay">📅 Dzisiaj: 06.10.2026</div>
+    <!-- Realna, dynamicznie pobierana data -->
+    <div class="date-badge" id="currentDateDisplay">📅 Dzisiaj: Loading...</div>
 
     <!-- Statystyki -->
     <div class="stats-card">
@@ -183,7 +179,6 @@
   </div>
 
   <script>
-    // Rejestracja Service Workera dla wsparcia PWA
     if ('serviceWorker' in navigator) {
       const swCode = `
         self.addEventListener('install', e => self.skipWaiting());
@@ -193,8 +188,16 @@
       navigator.serviceWorker.register(URL.createObjectURL(blob)).catch(() => {});
     }
 
-    // Ustawienie aktualnej daty
-    const todayFormatted = "06.10.2026";
+    // Automatyczne, dynamiczne wyliczanie dzisiejszej daty
+    function getTodayDateString() {
+      const today = new Date();
+      const day = String(today.getDate()).padStart(2, '0');
+      const month = String(today.getMonth() + 1).padStart(2, '0');
+      const year = today.getFullYear();
+      return `${day}.${month}.${year}`;
+    }
+
+    const todayFormatted = getTodayDateString();
     document.getElementById('currentDateDisplay').innerText = `📅 Dzisiaj: ${todayFormatted}`;
 
     let habits = JSON.parse(localStorage.getItem('habitsList') || '[]');
@@ -240,4 +243,77 @@
     }
 
     function incrementStreak(id) {
-      const habit
+      const habit = habits.find(h => h.id === id);
+      if (habit) { habit.streak++; saveHabits(); }
+    }
+
+    function resetStreak(id) {
+      const habit = habits.find(h => h.id === id);
+      if (habit && confirm('Czy na pewno złamałeś ten nawyk? Licznik wyzeruje się.')) {
+        habit.streak = 0; saveHabits();
+      }
+    }
+
+    function deleteHabit(id) {
+      if (confirm('Czy na pewno chcesz usunąć ten nawyk?')) {
+        habits = habits.filter(h => h.id !== id);
+        saveHabits();
+      }
+    }
+
+    function filterHabits(type, el) {
+      currentFilter = type;
+      document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+      el.classList.add('active');
+      render();
+    }
+
+    function render() {
+      const goodList = document.getElementById('goodHabitsList');
+      const badList = document.getElementById('badHabitsList');
+      const goodSec = document.getElementById('goodSection');
+      const badSec = document.getElementById('badSection');
+
+      goodList.innerHTML = ''; badList.innerHTML = '';
+      let goodCount = 0; let badCount = 0;
+
+      const filtered = habits.filter(h => {
+        if (currentFilter === 'good') return h.type === 'good';
+        if (currentFilter === 'bad') return h.type === 'bad';
+        return true;
+      });
+
+      filtered.forEach(h => {
+        const cardHtml = `
+          <div class="habit-card ${h.type}">
+            <div class="habit-info">
+              <h3>${h.name} <span class="badge">${h.category || 'Inne'}</span></h3>
+              <p>${h.type === 'good' ? 'Seria' : 'Czysty od'}: <strong>${h.streak} dni</strong></p>
+              <div class="created-date">Dodano: ${h.createdAt || todayFormatted}</div>
+            </div>
+            <div class="habit-actions">
+              <button class="btn-action btn-good" onclick="incrementStreak(${h.id})">+1 d. ✅</button>
+              ${h.type === 'bad' ? `<button class="btn-action btn-reset" onclick="resetStreak(${h.id})">Reset ⚠️</button>` : ''}
+              <button class="btn-delete" onclick="deleteHabit(${h.id})">🗑️</button>
+            </div>
+          </div>
+        `;
+        if (h.type === 'good') { goodList.innerHTML += cardHtml; goodCount += h.streak; }
+        else { badList.innerHTML += cardHtml; badCount += h.streak; }
+      });
+
+      goodSec.style.display = (currentFilter === 'bad') ? 'none' : 'block';
+      badSec.style.display = (currentFilter === 'good') ? 'none' : 'block';
+
+      if (goodList.innerHTML === '') goodList.innerHTML = '<p style="color:var(--text-muted); font-size: 13px;">Brak nawyków w tej sekcji.</p>';
+      if (badList.innerHTML === '') badList.innerHTML = '<p style="color:var(--text-muted); font-size: 13px;">Brak nawyków w tej sekcji.</p>';
+
+      document.getElementById('statTotal').innerText = habits.length;
+      document.getElementById('statGood').innerText = goodCount;
+      document.getElementById('statBad').innerText = badCount;
+    }
+
+    render();
+  </script>
+</body>
+</html>
