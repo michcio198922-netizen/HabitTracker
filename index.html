@@ -2,77 +2,176 @@
 <html lang="pl">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Mój Tracker Nawyków</title>
-  <link rel="manifest" href="data:application/manifest+json;utf8,{%22name%22:%22Tracker%20Nawyku%22,%22short_name%22:%22Nawyki%22,%22start_url%22:%22.%22,%22display%22:%22standalone%22,%22background_color%22:%22%230f172a%22,%22theme_color%22:%22%233b82f6%22}">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Mój Tracker Nawyków Pro</title>
+  <link rel="manifest" href="data:application/manifest+json;utf8,{%22name%22:%22Tracker%20Nawykow%20Pro%22,%22short_name%22:%22Nawyki%22,%22start_url%22:%22.%22,%22display%22:%22standalone%22,%22background_color%22:%22%230f172a%22,%22theme_color%22:%22%233b82f6%22}">
   <style>
-    * { box-sizing: border-box; }
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0f172a; color: #f8fafc; margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
-    .container { width: 100%; max-width: 480px; }
-    h1 { font-size: 24px; text-align: center; color: #60a5fa; margin-bottom: 20px; }
-    
-    .card { background: #1e293b; padding: 20px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); margin-bottom: 20px; }
-    .form-group { display: flex; flex-direction: column; gap: 10px; }
-    input[type="text"] { background: #0f172a; border: 1px solid #334155; color: white; padding: 12px; border-radius: 8px; font-size: 16px; outline: none; }
-    select { background: #0f172a; border: 1px solid #334155; color: white; padding: 12px; border-radius: 8px; font-size: 16px; }
-    
-    .btn { background: #2563eb; color: white; border: none; padding: 12px; font-size: 16px; font-weight: bold; border-radius: 8px; cursor: pointer; transition: 0.2s; }
-    .btn:active { transform: scale(0.98); }
-    
-    .section-title { font-size: 18px; margin: 15px 0 10px; font-weight: bold; }
-    .good-title { color: #10b981; }
-    .bad-title { color: #ef4444; }
+    :root {
+      --bg-color: #0f172a;
+      --card-bg: #1e293b;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --border-color: #334155;
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --good-color: #10b981;
+      --bad-color: #ef4444;
+      --accent: #f59e0b;
+    }
 
-    .habit-card { background: #1e293b; padding: 16px; border-radius: 12px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; border-left: 6px solid #2563eb; }
-    .habit-card.good { border-left-color: #10b981; }
-    .habit-card.bad { border-left-color: #ef4444; }
+    [data-theme="light"] {
+      --bg-color: #f1f5f9;
+      --card-bg: #ffffff;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --border-color: #e2e8f0;
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+    }
+
+    * { box-sizing: border-box; transition: background-color 0.2s, color 0.2s; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg-color); color: var(--text-main); margin: 0; padding: 16px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
+    .container { width: 100%; max-width: 500px; }
+
+    header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    h1 { font-size: 22px; margin: 0; color: #60a5fa; }
+    .theme-toggle { background: var(--card-bg); border: 1px solid var(--border-color); color: var(--text-main); padding: 8px 12px; border-radius: 20px; cursor: pointer; font-size: 14px; }
+
+    .stats-card { background: var(--card-bg); padding: 16px; border-radius: 16px; border: 1px solid var(--border-color); display: flex; justify-content: space-around; text-align: center; margin-bottom: 20px; }
+    .stat-val { font-size: 22px; font-weight: bold; color: var(--accent); }
+    .stat-lbl { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+
+    .card { background: var(--card-bg); padding: 18px; border-radius: 16px; border: 1px solid var(--border-color); margin-bottom: 20px; }
+    .form-group { display: flex; flex-direction: column; gap: 10px; }
+    input[type="text"], select { background: var(--bg-color); border: 1px solid var(--border-color); color: var(--text-main); padding: 12px; border-radius: 10px; font-size: 15px; outline: none; }
     
+    .btn { background: var(--primary); color: white; border: none; padding: 12px; font-size: 15px; font-weight: bold; border-radius: 10px; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 6px; }
+    .btn:active { transform: scale(0.98); background: var(--primary-hover); }
+
+    .filters { display: flex; gap: 8px; margin-bottom: 15px; overflow-x: auto; padding-bottom: 4px; }
+    .chip { background: var(--card-bg); border: 1px solid var(--border-color); color: var(--text-muted); padding: 6px 14px; border-radius: 20px; font-size: 13px; cursor: pointer; whitespace: nowrap; }
+    .chip.active { background: var(--primary); color: white; border-color: var(--primary); }
+
+    .section-title { font-size: 16px; margin: 15px 0 10px; font-weight: bold; display: flex; align-items: center; gap: 8px; }
+    .good-title { color: var(--good-color); }
+    .bad-title { color: var(--bad-color); }
+
+    .habit-card { background: var(--card-bg); padding: 16px; border-radius: 14px; margin-bottom: 12px; border: 1px solid var(--border-color); border-left: 6px solid var(--primary); display: flex; justify-content: space-between; align-items: center; }
+    .habit-card.good { border-left-color: var(--good-color); }
+    .habit-card.bad { border-left-color: var(--bad-color); }
+
     .habit-info h3 { margin: 0 0 4px 0; font-size: 16px; }
-    .habit-info p { margin: 0; font-size: 14px; color: #94a3b8; }
-    
-    .habit-actions { display: flex; gap: 8px; align-items: center; }
-    .btn-action { border: none; padding: 8px 12px; border-radius: 6px; font-weight: bold; cursor: pointer; color: white; }
+    .badge { font-size: 11px; padding: 2px 8px; border-radius: 10px; background: var(--bg-color); color: var(--text-muted); border: 1px solid var(--border-color); margin-left: 6px; }
+    .habit-info p { margin: 4px 0 0; font-size: 13px; color: var(--text-muted); }
+
+    .habit-actions { display: flex; gap: 6px; align-items: center; }
+    .btn-action { border: none; padding: 8px 12px; border-radius: 8px; font-weight: bold; cursor: pointer; color: white; font-size: 13px; }
     .btn-good { background: #059669; }
     .btn-reset { background: #dc2626; }
-    .btn-delete { background: transparent; color: #64748b; font-size: 18px; padding: 4px; }
+    .btn-delete { background: transparent; color: var(--text-muted); font-size: 16px; border: none; cursor: pointer; padding: 4px 8px; }
+
+    .backup-section { margin-top: 30px; text-align: center; font-size: 12px; color: var(--text-muted); }
+    .backup-btn { background: transparent; border: 1px solid var(--border-color); color: var(--text-muted); padding: 6px 12px; border-radius: 8px; font-size: 12px; cursor: pointer; margin: 4px; }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>Mój Tracker Nawyków</h1>
+    <header>
+      <h1>Mój Tracker Nawyków</h1>
+      <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn">🌙 Tryb</button>
+    </header>
 
-    <!-- Formularz dodawania nawyku -->
-    <div class="card">
-      <div class="form-group">
-        <input type="text" id="habitName" placeholder="Nazwa nawyku (np. Bieganie, Rzucenie cukru)">
-        <select id="habitType">
-          <option value="good">🟢 Dobry nawyk (chcę powtarzać)</option>
-          <option value="bad">🔴 Zły nawyk (chcę unikać)</option>
-        </select>
-        <button class="btn" onclick="addHabit()">+ Dodaj nawyk</button>
+    <!-- Statystyki -->
+    <div class="stats-card">
+      <div>
+        <div class="stat-val" id="statTotal">0</div>
+        <div class="stat-lbl">Nawyki</div>
+      </div>
+      <div>
+        <div class="stat-val" id="statGood">0</div>
+        <div class="stat-lbl">Dobre serii</div>
+      </div>
+      <div>
+        <div class="stat-val" id="statBad">0</div>
+        <div class="stat-lbl">Czystych dni</div>
       </div>
     </div>
 
-    <!-- Lista Dobrych Nawyków -->
-    <div class="section-title good-title">🟢 Dobre nawyki</div>
-    <div id="goodHabitsList"></div>
+    <!-- Formularz -->
+    <div class="card">
+      <div class="form-group">
+        <input type="text" id="habitName" placeholder="Nazwa nawyku (np. Bieganie, Rzucenie cukru)">
+        <div style="display: flex; gap: 8px;">
+          <select id="habitType" style="flex: 1;">
+            <option value="good">🟢 Dobry nawyk</option>
+            <option value="bad">🔴 Zły nawyk</option>
+          </select>
+          <select id="habitCategory" style="flex: 1;">
+            <option value="Zdrowie">🏥 Zdrowie</option>
+            <option value="Sport">⚽ Sport</option>
+            <option value="Umysł">🧠 Umysł</option>
+            <option value="Finanse">💰 Finanse</option>
+            <option value="Inne">⭐ Inne</option>
+          </select>
+        </div>
+        <button class="btn" onclick="addHabit()">+ Dodaj nowy nawyk</button>
+      </div>
+    </div>
 
-    <!-- Lista Złych Nawyków -->
-    <div class="section-title bad-title">🔴 Złe nawyki (Dni bez nawyku)</div>
-    <div id="badHabitsList"></div>
+    <!-- Filtry -->
+    <div class="filters">
+      <button class="chip active" onclick="filterHabits('all', this)">Wszystkie</button>
+      <button class="chip" onclick="filterHabits('good', this)">🟢 Dobre</button>
+      <button class="chip" onclick="filterHabits('bad', this)">🔴 Złe</button>
+    </div>
+
+    <!-- Listy Nawyków -->
+    <div id="goodSection">
+      <div class="section-title good-title">🟢 Dobre nawyki (Seria sukcesów)</div>
+      <div id="goodHabitsList"></div>
+    </div>
+
+    <div id="badSection">
+      <div class="section-title bad-title">🔴 Złe nawyki (Czyste dni bez nawyku)</div>
+      <div id="badHabitsList"></div>
+    </div>
+
+    <!-- Kopia zapasowa -->
+    <div class="backup-section">
+      <div>Zarządzanie danymi:</div>
+      <button class="backup-btn" onclick="exportData()">📥 Pobierz kopię (JSON)</button>
+      <button class="backup-btn" onclick="importData()">📤 Wgraj kopię</button>
+      <input type="file" id="importFile" style="display:none" onchange="processImport(event)">
+    </div>
   </div>
 
   <script>
     let habits = JSON.parse(localStorage.getItem('habitsList') || '[]');
+    let currentFilter = 'all';
 
     function saveHabits() {
       localStorage.setItem('habitsList', JSON.stringify(habits));
-      renderHabits();
+      render();
+    }
+
+    function toggleTheme() {
+      const body = document.body;
+      const isDark = body.getAttribute('data-theme') !== 'light';
+      body.setAttribute('data-theme', isDark ? 'light' : 'dark');
+      document.getElementById('themeBtn').innerText = isDark ? '☀️ Jasny' : '🌙 Ciemny';
+      localStorage.setItem('theme', isDark ? 'light' : 'dark');
+    }
+
+    // Wczytaj zapamiętany motyw
+    if (localStorage.getItem('theme') === 'light') {
+      document.body.setAttribute('data-theme', 'light');
+      document.getElementById('themeBtn').innerText = '☀️ Jasny';
     }
 
     function addHabit() {
       const nameInput = document.getElementById('habitName');
       const typeInput = document.getElementById('habitType');
+      const catInput = document.getElementById('habitCategory');
       const name = nameInput.value.trim();
 
       if (!name) return;
@@ -81,7 +180,9 @@
         id: Date.now(),
         name: name,
         type: typeInput.value,
-        streak: 0
+        category: catInput.value,
+        streak: 0,
+        createdAt: new Date().toLocaleDateString()
       });
 
       nameInput.value = '';
@@ -105,56 +206,106 @@
     }
 
     function deleteHabit(id) {
-      habits = habits.filter(h => h.id !== id);
-      saveHabits();
+      if (confirm('Czy na pewno chcesz usunąć ten nawyk?')) {
+        habits = habits.filter(h => h.id !== id);
+        saveHabits();
+      }
     }
 
-    function renderHabits() {
+    function filterHabits(type, el) {
+      currentFilter = type;
+      document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+      el.classList.add('active');
+      render();
+    }
+
+    function render() {
       const goodList = document.getElementById('goodHabitsList');
       const badList = document.getElementById('badHabitsList');
+      const goodSec = document.getElementById('goodSection');
+      const badSec = document.getElementById('badSection');
 
       goodList.innerHTML = '';
       badList.innerHTML = '';
 
-      const goodHabits = habits.filter(h => h.type === 'good');
-      const badHabits = habits.filter(h => h.type === 'bad');
+      let goodCount = 0;
+      let badCount = 0;
 
-      if (goodHabits.length === 0) goodList.innerHTML = '<p style="color:#64748b; font-size: 14px;">Brak dobrych nawyków.</p>';
-      if (badHabits.length === 0) badList.innerHTML = '<p style="color:#64748b; font-size: 14px;">Brak złych nawyków.</p>';
+      const filtered = habits.filter(h => {
+        if (currentFilter === 'good') return h.type === 'good';
+        if (currentFilter === 'bad') return h.type === 'bad';
+        return true;
+      });
 
-      goodHabits.forEach(h => {
-        goodList.innerHTML += `
-          <div class="habit-card good">
+      filtered.forEach(h => {
+        const cardHtml = `
+          <div class="habit-card ${h.type}">
             <div class="habit-info">
-              <h3>${h.name}</h3>
-              <p>Seria: <strong>${h.streak} dni</strong></p>
+              <h3>${h.name} <span class="badge">${h.category || 'Inne'}</span></h3>
+              <p>${h.type === 'good' ? 'Seria' : 'Czysty od'}: <strong>${h.streak} dni</strong></p>
             </div>
             <div class="habit-actions">
-              <button class="btn-action btn-good" onclick="incrementStreak(${h.id})">+1 dzień ✅</button>
+              <button class="btn-action btn-good" onclick="incrementStreak(${h.id})">+1 d. ✅</button>
+              ${h.type === 'bad' ? `<button class="btn-action btn-reset" onclick="resetStreak(${h.id})">Reset ⚠️</button>` : ''}
               <button class="btn-delete" onclick="deleteHabit(${h.id})">🗑️</button>
             </div>
           </div>
         `;
+
+        if (h.type === 'good') {
+          goodList.innerHTML += cardHtml;
+          goodCount += h.streak;
+        } else {
+          badList.innerHTML += cardHtml;
+          badCount += h.streak;
+        }
       });
 
-      badHabits.forEach(h => {
-        badList.innerHTML += `
-          <div class="habit-card bad">
-            <div class="habit-info">
-              <h3>${h.name}</h3>
-              <p>Czysty od: <strong>${h.streak} dni</strong></p>
-            </div>
-            <div class="habit-actions">
-              <button class="btn-action btn-good" onclick="incrementStreak(${h.id})">+1 dzień 💪</button>
-              <button class="btn-action btn-reset" onclick="resetStreak(${h.id})">Reset ⚠️</button>
-              <button class="btn-delete" onclick="deleteHabit(${h.id})">🗑️</button>
-            </div>
-          </div>
-        `;
-      });
+      // Ukrywanie sekcji przy filtrowaniu
+      goodSec.style.display = (currentFilter === 'bad') ? 'none' : 'block';
+      badSec.style.display = (currentFilter === 'good') ? 'none' : 'block';
+
+      if (goodList.innerHTML === '') goodList.innerHTML = '<p style="color:var(--text-muted); font-size: 13px;">Brak nawyków w tej sekcji.</p>';
+      if (badList.innerHTML === '') badList.innerHTML = '<p style="color:var(--text-muted); font-size: 13px;">Brak nawyków w tej sekcji.</p>';
+
+      // Aktualizacja statystyk
+      document.getElementById('statTotal').innerText = habits.length;
+      document.getElementById('statGood').innerText = goodCount;
+      document.getElementById('statBad').innerText = badCount;
     }
 
-    renderHabits();
+    // Eksport / Import danych
+    function exportData() {
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(habits));
+      const downloadAnchor = document.createElement('a');
+      downloadAnchor.setAttribute("href", dataStr);
+      downloadAnchor.setAttribute("download", "nawyki_backup.json");
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+    }
+
+    function importData() {
+      document.getElementById('importFile').click();
+    }
+
+    function processImport(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          habits = JSON.parse(e.target.result);
+          saveHabits();
+          alert('Kopia zapasowa została wgrana pomyślnie!');
+        } catch (err) {
+          alert('Błąd podczas odczytu pliku kopii zapasowej.');
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    render();
   </script>
 </body>
 </html>
