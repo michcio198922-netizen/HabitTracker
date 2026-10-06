@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Mój Tracker Nawyku</title>
+  <title>Mój Tracker Nawyków</title>
   <link rel="manifest" href="data:application/manifest+json;utf8,{%22name%22:%22Tracker%20Nawyku%22,%22short_name%22:%22Nawyki%22,%22start_url%22:%22.%22,%22display%22:%22standalone%22,%22background_color%22:%22%230f172a%22,%22theme_color%22:%22%233b82f6%22}">
   <style>
     * { box-sizing: border-box; }
@@ -105,7 +105,7 @@
     }
 
     function deleteHabit(id) {
-      habits = habits.filter(h => h.id === id);
+      habits = habits.filter(h => h.id !== id);
       saveHabits();
     }
 
