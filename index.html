@@ -1,318 +1,50 @@
-<!DOCTYPE html>
+]<!DOCTYPE html>
 <html lang="pl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Licznik Nawyków</title>
-    
-    <!-- PWA Manifest w jednym pliku -->
-    <link rel="manifest" href='data:application/manifest+json,{"name":"Licznik Nawyków","short_name":"Nawyki","start_url":".","display":"standalone","background_color":"#0f172a","theme_color":"#0f172a","icons":[{"src":"https://cdn-icons-png.flaticon.com/512/3407/3407024.png","sizes":"512x512","type":"image/png"}]}'>
-    <meta name="theme-color" content="#0f172a">
-
-    <style>
-        :root {
-            --bg-color: #0f172a;
-            --card-bg: #1e293b;
-            --text-main: #f8fafc;
-            --text-sub: #94a3b8;
-            --good-color: #22c55e;
-            --bad-color: #ef4444;
-            --accent: #3b82f6;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            margin: 0;
-            padding: 16px;
-            display: flex;
-            justify-content: center;
-        }
-
-        .container {
-            width: 100%;
-            max-width: 480px;
-        }
-
-        h1 {
-            text-align: center;
-            font-size: 1.5rem;
-            margin-bottom: 20px;
-        }
-
-        #installBanner {
-            display: none;
-            background: var(--accent);
-            color: white;
-            padding: 14px;
-            border-radius: 10px;
-            text-align: center;
-            margin-bottom: 16px;
-            font-weight: bold;
-            font-size: 1rem;
-            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
-        }
-
-        .add-box {
-            background: var(--card-bg);
-            padding: 16px;
-            border-radius: 12px;
-            margin-bottom: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        input, select, button {
-            font-size: 1rem;
-            padding: 12px;
-            border-radius: 8px;
-            border: none;
-            outline: none;
-        }
-
-        input[type="text"] {
-            background: #334155;
-            color: white;
-        }
-
-        select {
-            background: #334155;
-            color: white;
-        }
-
-        button.btn-add {
-            background: var(--accent);
-            color: white;
-            font-weight: bold;
-            cursor: pointer;
-        }
-
-        .habit-card {
-            background: var(--card-bg);
-            border-radius: 12px;
-            padding: 16px;
-            margin-bottom: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            border-left: 6px solid transparent;
-        }
-
-        .habit-card.good { border-left-color: var(--good-color); }
-        .habit-card.bad { border-left-color: var(--bad-color); }
-
-        .habit-info h3 {
-            margin: 0 0 4px 0;
-            font-size: 1.1rem;
-        }
-
-        .habit-info p {
-            margin: 0;
-            font-size: 0.85rem;
-            color: var(--text-sub);
-        }
-
-        .badge {
-            display: inline-block;
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-size: 0.75rem;
-            font-weight: bold;
-            margin-bottom: 4px;
-        }
-
-        .badge.good { background: rgba(34, 197, 94, 0.2); color: var(--good-color); }
-        .badge.bad { background: rgba(239, 68, 68, 0.2); color: var(--bad-color); }
-
-        .actions {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .btn-check {
-            background: #334155;
-            color: white;
-            border-radius: 50%;
-            width: 44px;
-            height: 44px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            font-size: 1.2rem;
-        }
-
-        .btn-check.done { background: var(--good-color); }
-
-        .btn-delete {
-            background: transparent;
-            color: var(--text-sub);
-            padding: 8px;
-            cursor: pointer;
-            font-size: 1.1rem;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mój Tracker Nawyku</title>
+  <link rel="manifest" href="data:application/manifest+json;utf8,{%22name%22:%22Tracker%20Nawyku%22,%22short_name%22:%22Nawyki%22,%22start_url%22:%22.%22,%22display%22:%22standalone%22,%22background_color%22:%22%230f172a%22,%22theme_color%22:%22%233b82f6%22}">
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0f172a; color: #f8fafc; margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
+    .card { background: #1e293b; padding: 24px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); width: 100%; max-width: 400px; text-align: center; }
+    h1 { font-size: 24px; margin-bottom: 8px; color: #60a5fa; }
+    p { color: #94a3b8; font-size: 14px; margin-bottom: 20px; }
+    .btn { background: #2563eb; color: white; border: none; padding: 14px 28px; font-size: 16px; font-weight: bold; border-radius: 12px; cursor: pointer; width: 100%; margin-top: 10px; transition: 0.2s; }
+    .btn:active { transform: scale(0.98); background: #1d4ed8; }
+    .pwa-btn { background: #059669; margin-bottom: 15px; display: none; }
+    .streak { font-size: 48px; font-weight: bold; color: #f59e0b; margin: 20px 0; }
+  </style>
 </head>
 <body>
+  <div class="card">
+    <button id="installBtn" class="btn pwa-btn">📲 ZAINSTALUJ APLIKACJĘ</button>
+    <h1>Aplikacja Nawyki</h1>
+    <p>Oznaczaj swój nawyk każdego dnia!</p>
+    <div class="streak" id="streak">0 dni</div>
+    <button class="btn" onclick="addDay()">Oznacz dzisiejszy dzień ✅</button>
+  </div>
 
-<div class="container">
-    <div id="installBanner" onclick="installPWA()">📲 Kliknij tutaj, aby ZAINSTALOWAĆ APLIKACJĘ</div>
+  <script>
+    let count = parseInt(localStorage.getItem('habitStreak') || '0');
+    document.getElementById('streak').innerText = count + ' dni';
 
-    <h1>Moje Nawyki</h1>
+    function addDay() {
+      count++;
+      localStorage.setItem('habitStreak', count);
+      document.getElementById('streak').innerText = count + ' dni';
+    }
 
-    <div class="add-box">
-        <input type="text" id="habitInput" placeholder="Nazwa nawyku...">
-        <select id="typeInput">
-            <option value="good">Dobry nawyk (chcę robić)</option>
-            <option value="bad">Zły nawyk (chcę unikać)</option>
-        </select>
-        <button class="btn-add" onclick="addHabit()">Dodaj nawyk</button>
-    </div>
-
-    <div id="habitList"></div>
-</div>
-
-<script>
     let deferredPrompt;
-    const installBanner = document.getElementById('installBanner');
-
     window.addEventListener('beforeinstallprompt', (e) => {
-        e.preventDefault();
-        deferredPrompt = e;
-        installBanner.style.display = 'block';
+      e.preventDefault();
+      deferredPrompt = e;
+      const btn = document.getElementById('installBtn');
+      btn.style.display = 'block';
+      btn.addEventListener('click', () => {
+        deferredPrompt.prompt();
+      });
     });
-
-    function installPWA() {
-        if (deferredPrompt) {
-            deferredPrompt.prompt();
-            deferredPrompt.userChoice.then((choiceResult) => {
-                if (choiceResult.outcome === 'accepted') {
-                    installBanner.style.display = 'none';
-                }
-                deferredPrompt = null;
-            });
-        }
-    }
-
-    // Rejestracja inline Service Worker
-    if ('serviceWorker' in navigator) {
-        const swCode = `
-            self.addEventListener('install', e => e.waitUntil(self.skipWaiting()));
-            self.addEventListener('activate', e => e.waitUntil(self.clients.claim()));
-            self.addEventListener('fetch', e => e.respondWith(fetch(e.request).catch(() => caches.match(e.request))));
-        `;
-        const blob = new Blob([swCode], { type: 'application/javascript' });
-        navigator.serviceWorker.register(URL.createObjectURL(blob)).catch(() => {});
-    }
-
-    let habits = JSON.parse(localStorage.getItem('habits')) || [];
-
-    function saveHabits() {
-        localStorage.setItem('habits', JSON.stringify(habits));
-    }
-
-    function getTodayString() {
-        return new Date().toISOString().split('T')[0];
-    }
-
-    function addHabit() {
-        const nameInput = document.getElementById('habitInput');
-        const typeInput = document.getElementById('typeInput');
-        const name = nameInput.value.trim();
-
-        if (!name) return;
-
-        habits.push({
-            id: Date.now(),
-            name: name,
-            type: typeInput.value,
-            history: []
-        });
-
-        saveHabits();
-        nameInput.value = '';
-        render();
-    }
-
-    function toggleToday(id) {
-        const habit = habits.find(h => h.id === id);
-        if (!habit) return;
-
-        const today = getTodayString();
-        const index = habit.history.indexOf(today);
-
-        if (index > -1) {
-            habit.history.splice(index, 1);
-        } else {
-            habit.history.push(today);
-        }
-
-        saveHabits();
-        render();
-    }
-
-    function deleteHabit(id) {
-        habits = habits.filter(h => h.id !== id);
-        saveHabits();
-        render();
-    }
-
-    function calculateStreak(history) {
-        if (!history || history.length === 0) return 0;
-        const sorted = [...history].sort().reverse();
-        const today = getTodayString();
-        const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
-
-        if (!sorted.includes(today) && !sorted.includes(yesterday)) return 0;
-
-        let streak = 0;
-        let checkDate = new Date();
-        if (!sorted.includes(today)) checkDate.setDate(checkDate.getDate() - 1);
-
-        while (true) {
-            const dateStr = checkDate.toISOString().split('T')[0];
-            if (sorted.includes(dateStr)) {
-                streak++;
-                checkDate.setDate(checkDate.getDate() - 1);
-            } else {
-                break;
-            }
-        }
-        return streak;
-    }
-
-    function render() {
-        const listEl = document.getElementById('habitList');
-        listEl.innerHTML = '';
-        const today = getTodayString();
-
-        habits.forEach(habit => {
-            const isDone = habit.history.includes(today);
-            const streak = calculateStreak(habit.history);
-            const card = document.createElement('div');
-            card.className = `habit-card ${habit.type}`;
-
-            card.innerHTML = `
-                <div class="habit-info">
-                    <span class="badge ${habit.type}">${habit.type === 'good' ? 'Dobry' : 'Zły'}</span>
-                    <h3>${habit.name}</h3>
-                    <p>Seria: <strong>${streak} dni</strong> | Razem: ${habit.history.length} dni</p>
-                </div>
-                <div class="actions">
-                    <button class="btn-check ${isDone ? 'done' : ''}" onclick="toggleToday(${habit.id})">
-                        ${isDone ? '✓' : '+'}
-                    </button>
-                    <button class="btn-delete" onclick="deleteHabit(${habit.id})">✕</button>
-                </div>
-            `;
-            listEl.appendChild(card);
-        });
-    }
-
-    render();
-</script>
+  </script>
 </body>
 </html>
